@@ -2,6 +2,7 @@ import express from "express";
 
 import {
   hashPassword,
+  reqToDbfailed,
   validateEmail,
   validateMobile,
 } from "../../utils/utils.js";
@@ -29,7 +30,13 @@ router.get("/check-mobile/:mobile", async (req, res) => {
     return;
   }
 
-  const userWithMobile = await UserModel.findOne({ mobile });
+  let userWithMobile;
+  try {
+    userWithMobile = await UserModel.findOne({ mobile });
+  } catch (err) {
+    reqToDbfailed(res, err);
+    return;
+  }
   if (userWithMobile) {
     res.status(statusCodes.ok).json({
       status: true,
@@ -84,9 +91,13 @@ router.post("/check-register-details", async (req, res) => {
     return;
   }
 
-  const hashedPassword = hashPassword(password);
-
-  const userWithEmail = await UserModel.findOne({ email });
+  let userWithEmail;
+  try {
+    userWithEmail = await UserModel.findOne({ email });
+  } catch (err) {
+    reqToDbfailed(res, err);
+    return;
+  }
   if (userWithEmail) {
     res.status(statusCodes.invalidDataSent).json({
       status: false,
@@ -95,7 +106,13 @@ router.post("/check-register-details", async (req, res) => {
     return;
   }
 
-  const userWithMobile = await UserModel.findOne({ mobile });
+  let userWithMobile;
+  try {
+    userWithMobile = await UserModel.findOne({ mobile });
+  } catch (err) {
+    reqToDbfailed(res, err);
+    return;
+  }
   if (userWithMobile) {
     res.status(statusCodes.invalidDataSent).json({
       status: false,
@@ -153,12 +170,22 @@ router.post("/login", async (req, res) => {
   if (isMerchant) {
     const hashedPassword = hashPassword(password);
 
-    user = await UserModel.findOne(
-      { email: email, password: hashedPassword },
-      "-password"
-    );
+    try {
+      user = await UserModel.findOne(
+        { email: email, password: hashedPassword },
+        "-password"
+      );
+    } catch (err) {
+      reqToDbfailed(res, err);
+      return;
+    }
   } else {
-    user = await UserModel.findOne({ mobile: mobile }, "-password");
+    try {
+      user = await UserModel.findOne({ mobile: mobile }, "-password");
+    } catch (err) {
+      reqToDbfailed(res, err);
+      return;
+    }
   }
 
   if (!user) {
@@ -220,7 +247,13 @@ router.post("/register", async (req, res) => {
 
   const hashedPassword = hashPassword(password);
 
-  const userWithEmail = await UserModel.findOne({ email });
+  let userWithEmail;
+  try {
+    userWithEmail = await UserModel.findOne({ email });
+  } catch (err) {
+    reqToDbfailed(res, err);
+    return;
+  }
   if (userWithEmail) {
     res.status(statusCodes.invalidDataSent).json({
       status: false,
@@ -229,7 +262,13 @@ router.post("/register", async (req, res) => {
     return;
   }
 
-  const userWithMobile = await UserModel.findOne({ mobile });
+  let userWithMobile;
+  try {
+    userWithMobile = await UserModel.findOne({ mobile });
+  } catch (err) {
+    reqToDbfailed(res, err);
+    return;
+  }
   if (userWithMobile) {
     res.status(statusCodes.invalidDataSent).json({
       status: false,

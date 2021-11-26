@@ -2,6 +2,7 @@ import express from "express";
 
 import ProductModel from "../../models/Product.js";
 import { pageSize as sizeOfPage, statusCodes } from "../../utils/constants.js";
+import { reqToDbfailed } from "../../utils/utils.js";
 const router = express.Router();
 
 router.get("/product/all", async (req, res) => {
@@ -11,13 +12,25 @@ router.get("/product/all", async (req, res) => {
 
   const pageNumber = req.query.pageNumber ? parseInt(req.query.pageNumber) : 1;
 
-  const result = await ProductModel.find({}, null, {
-    sort: { createdAt: -1 },
-    limit: pageSize,
-    skip: (pageNumber - 1) * pageSize || 0,
-  });
+  let result;
+  try {
+    result = await ProductModel.find({}, null, {
+      sort: { createdAt: -1 },
+      limit: pageSize,
+      skip: (pageNumber - 1) * pageSize || 0,
+    });
+  } catch (err) {
+    reqToDbfailed(res, err);
+    return;
+  }
 
-  const totalCount = await ProductModel.count();
+  let totalCount;
+  try {
+    totalCount = await ProductModel.count();
+  } catch (err) {
+    reqToDbfailed(res, err);
+    return;
+  }
 
   res.status(statusCodes.ok).json({
     status: true,
@@ -30,7 +43,13 @@ router.get("/product/all", async (req, res) => {
 router.get("/product/:productId", async (req, res) => {
   const productId = req.params.productId;
 
-  const result = await ProductModel.findOne({ _id: productId });
+  let result;
+  try {
+    result = await ProductModel.findOne({ _id: productId });
+  } catch (err) {
+    reqToDbfailed(res, err);
+    return;
+  }
 
   if (!result) {
     res.status(statusCodes.noDataAvailable).json({

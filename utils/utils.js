@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
-import { emailRegex, mobileRegex } from "./constants.js";
+import { emailRegex, mobileRegex, statusCodes } from "./constants.js";
 import { mongoUri } from "./secret.js";
 
 export function initaliseDb() {
@@ -40,5 +40,13 @@ export const compareHashedPassword = (plainPassword, hashedPassword) => {
   bcrypt.compare(plainPassword, hashedPassword, (err, result) => {
     if (err) return false;
     return result;
+  });
+};
+
+export const reqToDbfailed = (res, err) => {
+  res.send(statusCodes.databaseError).json({
+    status: false,
+    message: "Error requesting database",
+    error: err,
   });
 };

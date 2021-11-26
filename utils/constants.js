@@ -14,6 +14,7 @@ export const statusCodes = {
   invalidDataSent: 422,
   somethingWentWrong: 500,
   unauthorized: 401,
+  databaseError: 502,
 };
 
 export const emailRegex =
