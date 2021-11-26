@@ -6,7 +6,7 @@ import {
   validateMobile,
 } from "../../utils/utils.js";
 import { signToken } from "../../utils/authToken.js";
-import { userTypes } from "../../utils/constants.js";
+import { statusCodes, userTypes } from "../../utils/constants.js";
 import UserModel from "../../models/User.js";
 const router = express.Router();
 
@@ -14,7 +14,7 @@ router.get("/check-mobile/:mobile", async (req, res) => {
   const mobile = req.params.mobile;
 
   if (!mobile) {
-    res.status(422).json({
+    res.status(statusCodes.missingInfo).json({
       status: false,
       message: `Missing field - mobile number"
     }`,
@@ -22,7 +22,7 @@ router.get("/check-mobile/:mobile", async (req, res) => {
     return;
   }
   if (!validateMobile(mobile)) {
-    res.status(422).json({
+    res.status(statusCodes.invalidDataSent).json({
       status: false,
       message: `Invalid mobile number`,
     });
@@ -31,12 +31,12 @@ router.get("/check-mobile/:mobile", async (req, res) => {
 
   const userWithMobile = await UserModel.findOne({ mobile });
   if (userWithMobile) {
-    res.status(200).json({
+    res.status(statusCodes.ok).json({
       status: true,
       message: `User with this mobile number exists`,
     });
   } else {
-    res.status(409).json({
+    res.status(statusCodes.noDataAvailable).json({
       status: false,
       message: `Can't find user with this mobile`,
     });
@@ -46,7 +46,7 @@ router.post("/check-register-details", async (req, res) => {
   const { firstName, lastName, isMerchant, email, password, mobile } = req.body;
   if (isMerchant) {
     if (!firstName || !lastName || !email || !mobile || !password) {
-      res.status(422).json({
+      res.status(statusCodes.missingInfo).json({
         status: false,
         message: `Missing fields - ${firstName ? "" : "first name,"} ${
           lastName ? "" : "last name,"
@@ -58,7 +58,7 @@ router.post("/check-register-details", async (req, res) => {
     }
   } else {
     if (!firstName || !lastName || !mobile || !email) {
-      res.status(422).json({
+      res.status(statusCodes.missingInfo).json({
         status: false,
         message: `Missing fields - ${firstName ? "" : "first name,"} ${
           lastName ? "" : "last name,"
@@ -69,7 +69,7 @@ router.post("/check-register-details", async (req, res) => {
   }
 
   if (!validateEmail(email)) {
-    res.status(422).json({
+    res.status(statusCodes.invalidDataSent).json({
       status: false,
       message: `Invalid email`,
     });
@@ -77,7 +77,7 @@ router.post("/check-register-details", async (req, res) => {
     return;
   }
   if (!validateMobile(mobile)) {
-    res.status(422).json({
+    res.status(statusCodes.invalidDataSent).json({
       status: false,
       message: `Invalid mobile number`,
     });
@@ -88,7 +88,7 @@ router.post("/check-register-details", async (req, res) => {
 
   const userWithEmail = await UserModel.findOne({ email });
   if (userWithEmail) {
-    res.status(409).json({
+    res.status(statusCodes.invalidDataSent).json({
       status: false,
       message: `Email already exists. Try loggin in`,
     });
@@ -97,14 +97,14 @@ router.post("/check-register-details", async (req, res) => {
 
   const userWithMobile = await UserModel.findOne({ mobile });
   if (userWithMobile) {
-    res.status(409).json({
+    res.status(statusCodes.invalidDataSent).json({
       status: false,
       message: `Mobile number already exists. Try loggin in`,
     });
     return;
   }
 
-  res.status(200).json({
+  res.status(statusCodes.ok).json({
     status: true,
     message: `Valid credentials`,
   });
@@ -114,7 +114,7 @@ router.post("/login", async (req, res) => {
   const { isMerchant, email, password, mobile } = req.body;
   if (isMerchant) {
     if (!email || !password) {
-      res.status(422).json({
+      res.status(statusCodes.missingInfo).json({
         status: false,
         message: `Missing fields -${password ? "" : "password,"} ${
           email ? "" : "email"
@@ -124,7 +124,7 @@ router.post("/login", async (req, res) => {
     }
   } else {
     if (!mobile) {
-      res.status(422).json({
+      res.status(statusCodes.missingInfo).json({
         status: false,
         message: `Missing fields - ${mobile ? "" : "mobile number"}`,
       });
@@ -133,7 +133,7 @@ router.post("/login", async (req, res) => {
   }
 
   if (isMerchant && !validateEmail(email)) {
-    res.status(422).json({
+    res.status(statusCodes.invalidDataSent).json({
       status: false,
       message: `Invalid email`,
     });
@@ -142,7 +142,7 @@ router.post("/login", async (req, res) => {
   }
 
   if (!isMerchant && !validateMobile(mobile)) {
-    res.status(422).json({
+    res.status(statusCodes.invalidDataSent).json({
       status: false,
       message: `Invalid mobile number`,
     });
@@ -162,14 +162,14 @@ router.post("/login", async (req, res) => {
   }
 
   if (!user) {
-    res.status(409).json({
+    res.status(statusCodes.invalidDataSent).json({
       status: false,
       message: `Invalid credentails, can't find user`,
     });
     return;
   }
 
-  res.status(200).json({
+  res.status(statusCodes.ok).json({
     status: true,
     message: `User found`,
     data: user,
@@ -180,7 +180,7 @@ router.post("/register", async (req, res) => {
   const { firstName, lastName, isMerchant, email, password, mobile } = req.body;
   if (isMerchant) {
     if (!firstName || !lastName || !email || !mobile || !password) {
-      res.status(422).json({
+      res.status(statusCodes.missingInfo).json({
         status: false,
         message: `Missing fields - ${firstName ? "" : "first name,"} ${
           lastName ? "" : "last name,"
@@ -192,7 +192,7 @@ router.post("/register", async (req, res) => {
     }
   } else {
     if (!firstName || !lastName || !mobile || !email) {
-      res.status(422).json({
+      res.status(statusCodes.missingInfo).json({
         status: false,
         message: `Missing fields - ${firstName ? "" : "first name,"} ${
           lastName ? "" : "last name,"
@@ -203,7 +203,7 @@ router.post("/register", async (req, res) => {
   }
 
   if (!validateEmail(email)) {
-    res.status(422).json({
+    res.status(statusCodes.invalidDataSent).json({
       status: false,
       message: `Invalid email`,
     });
@@ -211,7 +211,7 @@ router.post("/register", async (req, res) => {
     return;
   }
   if (!validateMobile(mobile)) {
-    res.status(422).json({
+    res.status(statusCodes.invalidDataSent).json({
       status: false,
       message: `Invalid mobile number`,
     });
@@ -222,7 +222,7 @@ router.post("/register", async (req, res) => {
 
   const userWithEmail = await UserModel.findOne({ email });
   if (userWithEmail) {
-    res.status(409).json({
+    res.status(statusCodes.invalidDataSent).json({
       status: false,
       message: `Email already exists. Try loggin in`,
     });
@@ -231,7 +231,7 @@ router.post("/register", async (req, res) => {
 
   const userWithMobile = await UserModel.findOne({ mobile });
   if (userWithMobile) {
-    res.status(409).json({
+    res.status(statusCodes.invalidDataSent).json({
       status: false,
       message: `Mobile number already exists. Try loggin in`,
     });
@@ -261,14 +261,14 @@ router.post("/register", async (req, res) => {
   newUser
     .save()
     .then((response) => {
-      res.status(201).json({
+      res.status(statusCodes.created).json({
         status: true,
         message: `New user created`,
         data: response,
       });
     })
     .catch((err) => {
-      res.status(500).json({
+      res.status(statusCodes.somethingWentWrong).json({
         status: false,
         message: `Error creating user`,
         error: err,

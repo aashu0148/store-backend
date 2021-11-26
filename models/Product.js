@@ -8,6 +8,8 @@ const productSchema = mongoose.Schema({
   refCategory: String,
   thumbnail: String,
   images: Array,
+  createdAt: Date,
+  refCreatedBy: String,
 });
 
 const model = mongoose.model("Product", productSchema);

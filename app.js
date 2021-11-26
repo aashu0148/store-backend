@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import cors from "cors";
 import express from "express";
 import rootRouter from "./routes/index.js";
