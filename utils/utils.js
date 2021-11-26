@@ -44,7 +44,7 @@ export const compareHashedPassword = (plainPassword, hashedPassword) => {
 };
 
 export const reqToDbfailed = (res, err) => {
-  res.send(statusCodes.databaseError).json({
+  res.status(statusCodes.databaseError).json({
     status: false,
     message: "Error requesting database",
     error: err,
