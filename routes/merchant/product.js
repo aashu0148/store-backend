@@ -167,4 +167,29 @@ router.post("/product/update:productId", authenticateUser, async (req, res) => {
     });
 });
 
+router.get("/product/delete/:productId", async (req, res) => {
+  const productId = req.params.productId;
+
+  let result;
+  try {
+    result = await ProductModel.findOneAndDelete({ _id: productId });
+  } catch (err) {
+    reqToDbfailed(res, err);
+    return;
+  }
+
+  if (!result) {
+    res.status(statusCodes.noDataAvailable).json({
+      status: false,
+      message: "No product found",
+    });
+    return;
+  }
+
+  res.status(statusCodes.ok).json({
+    status: true,
+    message: "Product Deleted",
+  });
+});
+
 export default router;
