@@ -336,7 +336,7 @@ router.post("/register", async (req, res) => {
     });
 });
 
-router.get("/authenticate/:token", authenticateUser, (req, res) => {
+router.get("/authenticate", authenticateUser, (req, res) => {
   if (req.currentUser?._id) {
     res.status(statusCodes.ok).json({
       status: true,
