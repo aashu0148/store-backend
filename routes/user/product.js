@@ -2,7 +2,7 @@ import express from "express";
 
 import ProductModel from "../../models/Product.js";
 import { pageSize as sizeOfPage, statusCodes } from "../../utils/constants.js";
-import { reqToDbfailed } from "../../utils/utils.js";
+import { reqToDbFailed } from "../../utils/utils.js";
 const router = express.Router();
 
 router.get("/product/all", async (req, res) => {
@@ -20,7 +20,7 @@ router.get("/product/all", async (req, res) => {
       skip: (pageNumber - 1) * pageSize || 0,
     });
   } catch (err) {
-    reqToDbfailed(res, err);
+    reqToDbFailed(res, err);
     return;
   }
 
@@ -28,7 +28,7 @@ router.get("/product/all", async (req, res) => {
   try {
     totalCount = await ProductModel.count();
   } catch (err) {
-    reqToDbfailed(res, err);
+    reqToDbFailed(res, err);
     return;
   }
 
@@ -47,7 +47,7 @@ router.get("/product/:productId", async (req, res) => {
   try {
     result = await ProductModel.findOne({ _id: productId });
   } catch (err) {
-    reqToDbfailed(res, err);
+    reqToDbFailed(res, err);
     return;
   }
 

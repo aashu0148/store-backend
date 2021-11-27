@@ -1,6 +1,7 @@
 import UserModel from "../models/User.js";
 import { verifyToken } from "../utils/authToken.js";
 import { statusCodes } from "../utils/constants.js";
+import { reqToDbFailed } from "../utils/utils.js";
 
 const authenticateUser = async (req, res, next) => {
   try {
@@ -23,11 +24,25 @@ const authenticateUser = async (req, res, next) => {
     }
 
     const id = result.id;
-    const user = await UserModel.findOne({ _id: id });
+    const userType = result.userType;
+    let user;
+    try {
+      user = await UserModel.findOne({ _id: id });
+    } catch (err) {
+      reqToDbFailed(res, err);
+      return;
+    }
     if (!user) {
       res.status(statusCodes.invalidDataSent).json({
         status: false,
         message: "Authorization failed, user not found",
+      });
+      return;
+    }
+    if (user.userType !== userType) {
+      res.status(statusCodes.invalidDataSent).json({
+        status: false,
+        message: "Different User",
       });
       return;
     }

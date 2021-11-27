@@ -3,7 +3,7 @@ import express from "express";
 import ProductModel from "../../models/Product.js";
 import { statusCodes, userTypes } from "../../utils/constants.js";
 import { authenticateUser } from "../../middlewares/authenticate.js";
-import { reqToDbfailed } from "../../utils/utils.js";
+import { reqToDbFailed } from "../../utils/utils.js";
 const router = express.Router();
 
 router.post("/product/add", authenticateUser, async (req, res) => {
@@ -124,7 +124,7 @@ router.post("/product/update:productId", authenticateUser, async (req, res) => {
   try {
     result = await ProductModel.findOne({ _id: productId });
   } catch (err) {
-    reqToDbfailed(res, err);
+    reqToDbFailed(res, err);
     return;
   }
 
@@ -174,7 +174,7 @@ router.get("/product/delete/:productId", async (req, res) => {
   try {
     result = await ProductModel.findOneAndDelete({ _id: productId });
   } catch (err) {
-    reqToDbfailed(res, err);
+    reqToDbFailed(res, err);
     return;
   }
 

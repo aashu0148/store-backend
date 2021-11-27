@@ -2,13 +2,14 @@ import express from "express";
 
 import {
   hashPassword,
-  reqToDbfailed,
+  reqToDbFailed,
   validateEmail,
   validateMobile,
 } from "../../utils/utils.js";
 import { signToken } from "../../utils/authToken.js";
 import { statusCodes, userTypes } from "../../utils/constants.js";
 import UserModel from "../../models/User.js";
+import { authenticateUser } from "../../middlewares/authenticate.js";
 const router = express.Router();
 
 router.get("/check-mobile/:mobile", async (req, res) => {
@@ -34,7 +35,7 @@ router.get("/check-mobile/:mobile", async (req, res) => {
   try {
     userWithMobile = await UserModel.findOne({ mobile });
   } catch (err) {
-    reqToDbfailed(res, err);
+    reqToDbFailed(res, err);
     return;
   }
   if (userWithMobile) {
@@ -95,7 +96,7 @@ router.post("/check-register-details", async (req, res) => {
   try {
     userWithEmail = await UserModel.findOne({ email });
   } catch (err) {
-    reqToDbfailed(res, err);
+    reqToDbFailed(res, err);
     return;
   }
   if (userWithEmail) {
@@ -110,7 +111,7 @@ router.post("/check-register-details", async (req, res) => {
   try {
     userWithMobile = await UserModel.findOne({ mobile });
   } catch (err) {
-    reqToDbfailed(res, err);
+    reqToDbFailed(res, err);
     return;
   }
   if (userWithMobile) {
@@ -176,14 +177,14 @@ router.post("/login", async (req, res) => {
         "-password"
       );
     } catch (err) {
-      reqToDbfailed(res, err);
+      reqToDbFailed(res, err);
       return;
     }
   } else {
     try {
       user = await UserModel.findOne({ mobile: mobile }, "-password");
     } catch (err) {
-      reqToDbfailed(res, err);
+      reqToDbFailed(res, err);
       return;
     }
   }
@@ -196,11 +197,29 @@ router.post("/login", async (req, res) => {
     return;
   }
 
-  res.status(statusCodes.ok).json({
-    status: true,
-    message: `User found`,
-    data: user,
+  const token = signToken({
+    id: user._id,
+    userType: user.userType,
   });
+  user.authToken = token;
+
+  user
+    .save()
+    .then(() => {
+      res.status(statusCodes.ok).json({
+        status: true,
+        message: `User found`,
+        data: user,
+      });
+    })
+    .catch((err) => {
+      res.status(statusCodes.somethingWentWrong).json({
+        status: false,
+        message: `Error loggin in`,
+        error: err,
+      });
+      return;
+    });
 });
 
 router.post("/register", async (req, res) => {
@@ -251,7 +270,7 @@ router.post("/register", async (req, res) => {
   try {
     userWithEmail = await UserModel.findOne({ email });
   } catch (err) {
-    reqToDbfailed(res, err);
+    reqToDbFailed(res, err);
     return;
   }
   if (userWithEmail) {
@@ -266,7 +285,7 @@ router.post("/register", async (req, res) => {
   try {
     userWithMobile = await UserModel.findOne({ mobile });
   } catch (err) {
-    reqToDbfailed(res, err);
+    reqToDbFailed(res, err);
     return;
   }
   if (userWithMobile) {
@@ -294,6 +313,7 @@ router.post("/register", async (req, res) => {
 
   const token = signToken({
     id: newUser._id,
+    userType: newUser.userType,
   });
   newUser.authToken = token;
 
@@ -314,6 +334,21 @@ router.post("/register", async (req, res) => {
       });
       return;
     });
+});
+
+router.get("/authenticate/:token", authenticateUser, (req, res) => {
+  if (req.currentUser?._id) {
+    res.status(statusCodes.ok).json({
+      status: true,
+      message: "User authenticated",
+      data: req.currentUser,
+    });
+  } else {
+    res.status(statusCodes.invalidDataSent).json({
+      status: false,
+      message: "Not authenticated",
+    });
+  }
 });
 
 export default router;
