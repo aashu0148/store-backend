@@ -1,6 +1,7 @@
 import express from "express";
 
 import {
+  compareHashedPassword,
   hashPassword,
   reqToDbFailed,
   validateEmail,
@@ -94,7 +95,7 @@ router.post("/check-register-details", async (req, res) => {
 
   let userWithEmail;
   try {
-    userWithEmail = await UserModel.findOne({ email });
+    userWithEmail = await UserModel.findOne({ email: email.toLowerCase() });
   } catch (err) {
     reqToDbFailed(res, err);
     return;
@@ -169,15 +170,28 @@ router.post("/login", async (req, res) => {
 
   let user;
   if (isMerchant) {
-    const hashedPassword = hashPassword(password);
-
     try {
-      user = await UserModel.findOne(
-        { email: email, password: hashedPassword },
-        "-password"
-      );
+      user = await UserModel.findOne({ email: email.toLowerCase() });
     } catch (err) {
       reqToDbFailed(res, err);
+      return;
+    }
+
+    if (!user) {
+      res.status(statusCodes.invalidDataSent).json({
+        status: false,
+        message: `Invalid email, can't find user`,
+      });
+      return;
+    }
+
+    const hashedPassword = user.password;
+    if (!compareHashedPassword(password, hashedPassword));
+    {
+      res.status(statusCodes.invalidDataSent).json({
+        status: false,
+        message: `Invalid credentails`,
+      });
       return;
     }
   } else {
@@ -187,14 +201,14 @@ router.post("/login", async (req, res) => {
       reqToDbFailed(res, err);
       return;
     }
-  }
 
-  if (!user) {
-    res.status(statusCodes.invalidDataSent).json({
-      status: false,
-      message: `Invalid credentails, can't find user`,
-    });
-    return;
+    if (!user) {
+      res.status(statusCodes.invalidDataSent).json({
+        status: false,
+        message: `Invalid credentails, can't find user`,
+      });
+      return;
+    }
   }
 
   const token = signToken({
@@ -300,7 +314,7 @@ router.post("/register", async (req, res) => {
     firstName,
     lastName,
     userType: isMerchant ? userTypes.merchant : userTypes.customer,
-    email: email,
+    email: email.toLowerCase(),
     password: hashedPassword,
     mobile: mobile,
     deliveryAddress: "",

@@ -30,17 +30,11 @@ export const validateMobile = (mobile) => {
 };
 
 export const hashPassword = (password) => {
-  bcrypt.hash(password, 10, (err, hash) => {
-    if (err) return "";
-    return hash;
-  });
+  return bcrypt.hashSync(password, 10);
 };
 
 export const compareHashedPassword = (plainPassword, hashedPassword) => {
-  bcrypt.compare(plainPassword, hashedPassword, (err, result) => {
-    if (err) return false;
-    return result;
-  });
+  return bcrypt.compareSync(plainPassword, hashedPassword);
 };
 
 export const reqToDbFailed = (res, err) => {
