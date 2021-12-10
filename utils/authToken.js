@@ -9,8 +9,9 @@ export const signToken = (payload) => {
 };
 
 export const verifyToken = (token) => {
-  jwt.verify(token, jwtSecret, (err, verifiedJwt) => {
+  const result = jwt.verify(token, jwtSecret, (err, verifiedJwt) => {
     if (err) return false;
     else return verifiedJwt;
   });
+  return result;
 };

@@ -5,7 +5,7 @@ import { reqToDbFailed } from "../utils/utils.js";
 
 const authenticateUser = async (req, res, next) => {
   try {
-    const token = req.authorization;
+    const token = req.headers.authorization;
     if (!token) {
       res.status(statusCodes.missingInfo).json({
         status: false,
