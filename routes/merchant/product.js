@@ -13,6 +13,7 @@ router.post("/product/add", authenticateUser, async (req, res) => {
     title,
     description,
     refCategory,
+    refUnit,
     thumbnail,
     images,
     price,
@@ -42,15 +43,18 @@ router.post("/product/add", authenticateUser, async (req, res) => {
     !price ||
     !refCategory ||
     !thumbnail ||
-    !images
+    !images ||
+    !refUnit
   ) {
     res.status(statusCodes.missingInfo).json({
       status: false,
-      message: `Missing fields - ${title ? "" : title + " "} ${
-        description ? "" : description + " "
-      } ${price ? "" : price + " "} ${discount ? "" : discount + " "} ${
-        refCategory ? "" : refCategory + " "
-      } ${thumbnail ? "" : thumbnail + " "} ${images ? "" : images + " "}`,
+      message: `Missing fields - ${title ? "" : "title" + " "} ${
+        description ? "" : "description" + " "
+      } ${price ? "" : "price" + " "} ${discount ? "" : "discount" + " "} ${
+        refCategory ? "" : "refCategory" + " "
+      }${refUnit ? "" : "refUnit" + " "} ${
+        thumbnail ? "" : "thumbnail" + " "
+      } ${images ? "" : "images" + " "}`,
     });
     return;
   }
@@ -61,6 +65,7 @@ router.post("/product/add", authenticateUser, async (req, res) => {
     discount: parseInt(discount),
     price: parseInt(price),
     refCategory,
+    refUnit,
     thumbnail,
     images,
     createdAt: new Date(),
@@ -92,6 +97,7 @@ router.post("/product/update:productId", authenticateUser, async (req, res) => {
     title,
     description,
     refCategory,
+    refUnit,
     thumbnail,
     images,
     price,
@@ -136,6 +142,9 @@ router.post("/product/update:productId", authenticateUser, async (req, res) => {
   }
   if (refCategory) {
     result.refCategory = refCategory;
+  }
+  if (refUnit) {
+    result.refUnit = refUnit;
   }
   if (thumbnail) {
     result.thumbnail = thumbnail;
