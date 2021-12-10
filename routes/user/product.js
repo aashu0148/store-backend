@@ -12,10 +12,54 @@ router.get("/product/all", async (req, res) => {
 
   const pageNumber = req.query.pageNumber ? parseInt(req.query.pageNumber) : 1;
 
+  const filters = {};
+  const sorting = {};
+  const searchQuery = req.query.search || "";
+  const discount = req.query.discount || "";
+  const minPrice = req.query.minimumPrice || "";
+  const refCategory = req.query.refCategory || "";
+  const refCreatedBy = req.query.refCreatedBy || "";
+  const sortBy = req.query.sortBy || "";
+
+  if (searchQuery) {
+    filters.title = {
+      $regex: new RegExp(searchQuery?.split(" ")?.join("|"), "i"),
+    };
+  }
+  if (discount && parseInt(discount) < 100) {
+    filters.discount = { $gte: discount };
+  }
+  if (minPrice && parseInt(minPrice) > 0) {
+    filters.price = { $lte: price };
+  }
+  if (refCategory) {
+    filters.refCategory = refCategory;
+  }
+  if (refCreatedBy) {
+    filters.refCreatedBy = refCreatedBy;
+  }
+
+  switch (sortBy) {
+    case "price-a": {
+      sorting.price = 1;
+      break;
+    }
+    case "price-d": {
+      sorting.price = -1;
+      break;
+    }
+    case "discount": {
+      sorting.discount = -1;
+      break;
+    }
+    default:
+      sorting.createdAt = -1;
+  }
+
   let result;
   try {
-    result = await ProductModel.find({}, null, {
-      sort: { createdAt: -1 },
+    result = await ProductModel.find(filters, null, {
+      sort: sorting,
       limit: pageSize,
       skip: (pageNumber - 1) * pageSize || 0,
     });
@@ -26,7 +70,7 @@ router.get("/product/all", async (req, res) => {
 
   let totalCount;
   try {
-    totalCount = await ProductModel.count();
+    totalCount = await ProductModel.countDocuments(filters);
   } catch (err) {
     reqToDbFailed(res, err);
     return;

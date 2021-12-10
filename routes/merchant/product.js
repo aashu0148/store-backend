@@ -39,22 +39,30 @@ router.post("/product/add", authenticateUser, async (req, res) => {
   if (
     !title ||
     !description ||
-    !discount ||
     !price ||
     !refCategory ||
     !thumbnail ||
-    !images ||
-    !refUnit
+    !Array.isArray(images) ||
+    !refUnit ||
+    !quantity
   ) {
     res.status(statusCodes.missingInfo).json({
       status: false,
       message: `Missing fields - ${title ? "" : "title" + " "} ${
         description ? "" : "description" + " "
-      } ${price ? "" : "price" + " "} ${discount ? "" : "discount" + " "} ${
+      } ${price ? "" : "price" + " "} ${quantity ? "" : "quantity" + " "} ${
         refCategory ? "" : "refCategory" + " "
       }${refUnit ? "" : "refUnit" + " "} ${
         thumbnail ? "" : "thumbnail" + " "
-      } ${images ? "" : "images" + " "}`,
+      } ${Array.isArray(images) ? "" : "images" + " "}`,
+    });
+    return;
+  }
+
+  if (discount && parseInt(discount) > 99) {
+    res.status(statusCodes.invalidDataSent).json({
+      status: false,
+      message: "Maximum discount can only be 99%",
     });
     return;
   }
@@ -62,7 +70,8 @@ router.post("/product/add", authenticateUser, async (req, res) => {
   const newProduct = new ProductModel({
     title,
     description,
-    discount: parseInt(discount),
+    discount: parseInt(discount) || 0,
+    quantity: parseInt(quantity) || 0,
     price: parseInt(price),
     refCategory,
     refUnit,
@@ -102,6 +111,7 @@ router.post("/product/update:productId", authenticateUser, async (req, res) => {
     images,
     price,
     discount,
+    quantity,
   } = req.body;
 
   if (userTypes.merchant !== userType) {
@@ -134,6 +144,28 @@ router.post("/product/update:productId", authenticateUser, async (req, res) => {
     return;
   }
 
+  if (discount && parseInt(discount) >= 100) {
+    res.status(statusCodes.invalidDataSent).json({
+      status: false,
+      message: "Max discount can only be 99%",
+    });
+    return;
+  }
+  if (quantity && parseInt(quantity) < 1) {
+    res.status(statusCodes.invalidDataSent).json({
+      status: false,
+      message: "Minimum quantity can only be 1",
+    });
+    return;
+  }
+  if (price && parseInt(price) < 1) {
+    res.status(statusCodes.invalidDataSent).json({
+      status: false,
+      message: "Minimum price can only be 1",
+    });
+    return;
+  }
+
   if (title) {
     result.title = title;
   }
@@ -151,6 +183,9 @@ router.post("/product/update:productId", authenticateUser, async (req, res) => {
   }
   if (discount) {
     result.discount = parseInt(discount);
+  }
+  if (quantity) {
+    result.quantity = parseInt(quantity);
   }
   if (price) {
     result.price = parseInt(price);
