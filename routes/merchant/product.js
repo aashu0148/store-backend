@@ -18,6 +18,7 @@ router.post("/product/add", authenticateUser, async (req, res) => {
     images,
     price,
     discount,
+    quantity,
   } = req.body;
 
   if (userTypes.merchant !== userType) {
