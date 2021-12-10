@@ -39,6 +39,7 @@ const authenticateUser = async (req, res, next) => {
       });
       return;
     }
+
     if (user.userType !== userType) {
       res.status(statusCodes.invalidDataSent).json({
         status: false,
@@ -46,7 +47,7 @@ const authenticateUser = async (req, res, next) => {
       });
       return;
     }
-    if (user.authTokem !== token) {
+    if (user.authToken != token) {
       res.status(statusCodes.pageNotFound).json({
         status: false,
         message: "Logged in to some other device, need to login again",
