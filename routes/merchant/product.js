@@ -139,9 +139,20 @@ router.post("/product/update:productId", authenticateUser, async (req, res) => {
 
   let result;
   try {
-    result = await ProductModel.findOne({ _id: productId });
+    result = await ProductModel.findOne({
+      _id: productId,
+      refCreatedBy: userId,
+    });
   } catch (err) {
     reqToDbFailed(res, err);
+    return;
+  }
+
+  if (!result) {
+    res.status(statusCodes.noDataAvailable).json({
+      status: false,
+      message: "Product not found",
+    });
     return;
   }
 
@@ -212,12 +223,25 @@ router.post("/product/update:productId", authenticateUser, async (req, res) => {
     });
 });
 
-router.get("/product/delete/:productId", async (req, res) => {
+router.get("/product/delete/:productId", authenticateUser, async (req, res) => {
+  const userId = req.currentUser?._id;
+
+  if (!userId) {
+    res.status(statusCodes.unauthorized).json({
+      status: false,
+      message: "Authorization failed",
+    });
+    return;
+  }
+
   const productId = req.params.productId;
 
   let result;
   try {
-    result = await ProductModel.findOneAndDelete({ _id: productId });
+    result = await ProductModel.findOneAndDelete({
+      _id: productId,
+      refCreatedBy: userId,
+    });
   } catch (err) {
     reqToDbFailed(res, err);
     return;
@@ -226,7 +250,7 @@ router.get("/product/delete/:productId", async (req, res) => {
   if (!result) {
     res.status(statusCodes.noDataAvailable).json({
       status: false,
-      message: "No product found",
+      message: "Product not found",
     });
     return;
   }
