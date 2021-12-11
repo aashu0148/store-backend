@@ -6,12 +6,12 @@ const productSchema = mongoose.Schema({
   discount: Number,
   price: Number,
   quantity: Number,
-  refCategory: String,
-  refUnit: String,
+  refCategory: { type: String, ref: "Category" },
+  refUnit: { type: String, ref: "Unit" },
   thumbnail: String,
   images: Array,
   createdAt: Date,
-  refCreatedBy: String,
+  refCreatedBy: { type: String, ref: "User" },
 });
 
 const model = mongoose.model("Product", productSchema);

@@ -41,6 +41,6 @@ export const reqToDbFailed = (res, err) => {
   res.status(statusCodes.databaseError).json({
     status: false,
     message: "Error requesting database",
-    error: err,
+    error: err + "",
   });
 };
