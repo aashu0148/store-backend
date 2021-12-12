@@ -40,6 +40,14 @@ router.get("/check-mobile/:mobile", async (req, res) => {
     return;
   }
   if (userWithMobile) {
+    if (userWithMobile.userType !== userTypes.customer) {
+      res.status(statusCodes.invalidDataSent).json({
+        status: false,
+        message: `Not a customer, signin as merchant`,
+      });
+      return;
+    }
+
     res.status(statusCodes.ok).json({
       status: true,
       message: `User with this mobile number exists`,
@@ -206,6 +214,14 @@ router.post("/login", async (req, res) => {
       res.status(statusCodes.invalidDataSent).json({
         status: false,
         message: `Invalid credentails, can't find user`,
+      });
+      return;
+    }
+
+    if (user.userType !== userTypes.customer) {
+      res.status(statusCodes.invalidDataSent).json({
+        status: false,
+        message: `Not a customer, signin as merchant`,
       });
       return;
     }
