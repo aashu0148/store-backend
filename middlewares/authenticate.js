@@ -27,7 +27,7 @@ const authenticateUser = async (req, res, next) => {
     const userType = result.userType;
     let user;
     try {
-      user = await UserModel.findOne({ _id: id }, { password: -1 });
+      user = await UserModel.findOne({ _id: id }, "-password");
     } catch (err) {
       reqToDbFailed(res, err);
       return;
