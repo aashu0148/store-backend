@@ -193,9 +193,16 @@ router.post("/login", async (req, res) => {
       return;
     }
 
+    if (user.userType !== userTypes.merchant) {
+      res.status(statusCodes.invalidDataSent).json({
+        status: false,
+        message: `Not a merchant, signin as customer`,
+      });
+      return;
+    }
+
     const hashedPassword = user.password;
-    if (!compareHashedPassword(password, hashedPassword));
-    {
+    if (!compareHashedPassword(password, hashedPassword)) {
       res.status(statusCodes.invalidDataSent).json({
         status: false,
         message: `Invalid credentails`,
