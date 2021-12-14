@@ -313,7 +313,7 @@ router.post("/register", async (req, res) => {
   if (userWithEmail) {
     res.status(statusCodes.invalidDataSent).json({
       status: false,
-      message: `Email already exists. Try loggin in`,
+      message: `Email already in use`,
     });
     return;
   }
@@ -328,7 +328,7 @@ router.post("/register", async (req, res) => {
   if (userWithMobile) {
     res.status(statusCodes.invalidDataSent).json({
       status: false,
-      message: `Mobile number already exists. Try loggin in`,
+      message: `Mobile number already in use`,
     });
     return;
   }
