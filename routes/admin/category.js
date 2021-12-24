@@ -1,4 +1,5 @@
 import express from "express";
+import { ObjectId } from "mongodb";
 
 import Category from "../../models/admin/Category.js";
 import { statusCodes } from "../../utils/constants.js";
@@ -19,6 +20,36 @@ router.get("/category", async (req, res) => {
     message: "Categories found",
     data: categories,
   });
+});
+
+router.get("/sub-category/:refCategory", async (req, res) => {
+  const categoryRef = req.params.refCategory;
+
+  let category;
+  try {
+    category = await Category.findOne({ _id: categoryRef });
+  } catch (err) {
+    reqToDbFailed(res, err);
+    return;
+  }
+
+  if (!category) {
+    res.status(statusCodes.invalidDataSent).json({
+      status: false,
+      message: "Invalid category id",
+    });
+  } else if (category?.subCategory?.length) {
+    res.status(statusCodes.ok).json({
+      status: true,
+      message: "Sub categories found",
+      data: category?.subCategory,
+    });
+  } else {
+    res.status(statusCodes.noDataAvailable).json({
+      status: false,
+      message: "Sub categories not found",
+    });
+  }
 });
 
 router.post("/category/add", async (req, res) => {
@@ -64,5 +95,23 @@ router.post("/category/add", async (req, res) => {
       });
     });
 });
+
+// router.get("/category/script", async (req, res) => {
+//   for (let i = 0; i < categories.length; ++i) {
+//     const subCategory = categories[i].subCategory.map((item) => ({
+//       _id: new ObjectId(),
+//       ...item,
+//     }));
+//     const newCategory = new Category({
+//       name: categories[i].name,
+//       subCategory: subCategory,
+//       url: categories[i].url,
+//     });
+
+//     await newCategory.save();
+//     console.log("saving", categories[i].name, "...");
+//   }
+//   console.log("saved all");
+// });
 
 export default router;

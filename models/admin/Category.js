@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const categorySchema = mongoose.Schema({
   name: String,
-  examples: Array,
+  subCategory: [Object],
   url: String,
 });
 
