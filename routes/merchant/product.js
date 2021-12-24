@@ -13,6 +13,7 @@ router.post("/product/add", authenticateUser, async (req, res) => {
     title,
     description,
     refCategory,
+    refSubCategory,
     refUnit,
     thumbnail,
     images,
@@ -42,6 +43,7 @@ router.post("/product/add", authenticateUser, async (req, res) => {
     !description ||
     !price ||
     !refCategory ||
+    !refSubCategory ||
     !thumbnail ||
     !Array.isArray(images) ||
     !refUnit ||
@@ -53,9 +55,11 @@ router.post("/product/add", authenticateUser, async (req, res) => {
         description ? "" : "description" + " "
       } ${price ? "" : "price" + " "} ${quantity ? "" : "quantity" + " "} ${
         refCategory ? "" : "refCategory" + " "
-      }${refUnit ? "" : "refUnit" + " "} ${
-        thumbnail ? "" : "thumbnail" + " "
-      } ${Array.isArray(images) ? "" : "images" + " "}`,
+      } ${refSubCategory ? "" : "refSubCategory" + " "}${
+        refUnit ? "" : "refUnit" + " "
+      } ${thumbnail ? "" : "thumbnail" + " "} ${
+        Array.isArray(images) ? "" : "images" + " "
+      }`,
     });
     return;
   }
@@ -75,6 +79,7 @@ router.post("/product/add", authenticateUser, async (req, res) => {
     quantity: parseInt(quantity) || 0,
     price: parseInt(price),
     refCategory,
+    refSubCategory,
     refUnit,
     thumbnail,
     images,
@@ -107,6 +112,7 @@ router.post("/product/update:productId", authenticateUser, async (req, res) => {
     title,
     description,
     refCategory,
+    refSubCategory,
     refUnit,
     thumbnail,
     images,
@@ -118,7 +124,7 @@ router.post("/product/update:productId", authenticateUser, async (req, res) => {
   if (userTypes.merchant !== userType) {
     res.status(statusCodes.unauthorized).json({
       status: false,
-      message: "Merchant acount needed",
+      message: "Merchant account needed",
     });
     return;
   }
@@ -186,6 +192,9 @@ router.post("/product/update:productId", authenticateUser, async (req, res) => {
   }
   if (refCategory) {
     result.refCategory = refCategory;
+  }
+  if (refSubCategory) {
+    result.refSubCategory = refSubCategory;
   }
   if (refUnit) {
     result.refUnit = refUnit;
