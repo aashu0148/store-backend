@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const cartSchema = mongoose.Schema({
   createdAt: Date,
   userId: String,
-  products: Array,
+  products: [ {refProduct: { type: String, ref: "Product" }}],
   updatedAt:Date
 });
 
