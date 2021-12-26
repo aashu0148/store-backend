@@ -97,6 +97,7 @@ router.get("/product/all", async (req, res) => {
             as: "category",
           },
         },
+        { $sort: { total: -1 } },
       ]);
 
       filtersWithCategories = tempResult.map((item) => {
@@ -107,7 +108,7 @@ router.get("/product/all", async (req, res) => {
         const commonSubCategory = subCategories.find(
           (elem) => elem._id == commonSubCategoryId
         );
-        
+
         return {
           ...item,
           subCategory: commonSubCategory,
@@ -132,6 +133,7 @@ router.get("/product/all", async (req, res) => {
             as: "category",
           },
         },
+        { $sort: { total: -1 } },
       ]);
 
       filtersWithCategories = tempResult.map((item) => ({
@@ -152,7 +154,7 @@ router.get("/product/all", async (req, res) => {
         data: totalProducts,
         total: totalCount,
       },
-      filters: filtersWithCategories,
+      categories: filtersWithCategories,
     },
   });
 });
