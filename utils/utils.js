@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
 import { emailRegex, mobileRegex, statusCodes } from "./constants.js";
+import { avatarLinks } from "./constants.js";
 import { mongoUri } from "./secret.js";
 
 export function initaliseDb() {
@@ -43,4 +44,18 @@ export const reqToDbFailed = (res, err) => {
     message: "Error requesting database",
     error: err + "",
   });
+};
+
+export const randomNumberBetween = (min, max) => {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+};
+
+export const generateRandomAvatar = () => {
+  const men = randomNumberBetween(0, 1) ? true : false;
+  if (men)
+    return avatarLinks.men[randomNumberBetween(0, avatarLinks.men.length - 1)];
+
+  return avatarLinks.women[
+    randomNumberBetween(0, avatarLinks.women.length - 1)
+  ];
 };

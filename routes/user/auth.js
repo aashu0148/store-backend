@@ -2,6 +2,7 @@ import express from "express";
 
 import {
   compareHashedPassword,
+  generateRandomAvatar,
   hashPassword,
   reqToDbFailed,
   validateEmail,
@@ -301,7 +302,9 @@ router.post("/register", async (req, res) => {
     return;
   }
 
-  const hashedPassword = hashPassword(password);
+  let hashedPassword;
+  if (isMerchant) hashPassword(password);
+  else hashedPassword = "";
 
   let userWithEmail;
   try {
@@ -336,6 +339,7 @@ router.post("/register", async (req, res) => {
   const newUser = new UserModel({
     firstName,
     lastName,
+    profileImage: generateRandomAvatar(),
     userType: isMerchant ? userTypes.merchant : userTypes.customer,
     email: email.toLowerCase(),
     password: hashedPassword,
