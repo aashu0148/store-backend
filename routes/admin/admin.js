@@ -9,6 +9,7 @@ const adminRouter = express.Router();
 
 adminRouter.use(categoryRoute);
 adminRouter.use(locationRoute);
+adminRouter.use(unitRoute);
 adminRouter.use(avatarRoute);
 
 export default adminRouter;
