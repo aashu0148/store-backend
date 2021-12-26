@@ -15,6 +15,8 @@ const productSchema = mongoose.Schema({
   refCreatedBy: { type: String, ref: "User" },
 });
 
+productSchema.index({ refCategory: 1, title: 1 });
+
 const model = mongoose.model("Product", productSchema);
 
 export default model;
