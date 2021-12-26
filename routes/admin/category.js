@@ -1,5 +1,4 @@
 import express from "express";
-import { ObjectId } from "mongodb";
 
 import Category from "../../models/admin/Category.js";
 import { statusCodes } from "../../utils/constants.js";
