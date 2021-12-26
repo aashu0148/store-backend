@@ -56,9 +56,9 @@ router.get("/product/all", async (req, res) => {
       sorting.createdAt = -1;
   }
 
-  let result;
+  let totalProducts;
   try {
-    result = await ProductModel.find(filters, null, {
+    totalProducts = await ProductModel.find(filters, null, {
       sort: sorting,
       limit: pageSize,
       skip: (pageNumber - 1) * pageSize || 0,
@@ -76,11 +76,84 @@ router.get("/product/all", async (req, res) => {
     return;
   }
 
+  let filtersWithCategories;
+  try {
+    if (refCategory) {
+      const tempResult = await ProductModel.aggregate([
+        {
+          $match: filters,
+        },
+        {
+          $group: {
+            _id: { $toObjectId: "$refSubCategory" },
+            total: { $sum: 1 },
+          },
+        },
+        {
+          $lookup: {
+            from: "categories",
+            localField: "_id",
+            foreignField: "subCategory._id",
+            as: "category",
+          },
+        },
+      ]);
+
+      filtersWithCategories = tempResult.map((item) => {
+        const category = item?.category[0];
+        const subCategories = [...category.subCategory];
+        const commonSubCategoryId = item._id?.toString();
+
+        const commonSubCategory = subCategories.find(
+          (elem) => elem._id == commonSubCategoryId
+        );
+        
+        return {
+          ...item,
+          subCategory: commonSubCategory,
+        };
+      });
+    } else {
+      const tempResult = await ProductModel.aggregate([
+        {
+          $match: filters,
+        },
+        {
+          $group: {
+            _id: { $toObjectId: "$refCategory" },
+            total: { $sum: 1 },
+          },
+        },
+        {
+          $lookup: {
+            from: "categories",
+            localField: "_id",
+            foreignField: "_id",
+            as: "category",
+          },
+        },
+      ]);
+
+      filtersWithCategories = tempResult.map((item) => ({
+        ...item,
+        category: { ...item.category[0] },
+      }));
+    }
+  } catch (err) {
+    reqToDbFailed(res, err);
+    return;
+  }
+
   res.status(statusCodes.ok).json({
     status: true,
     message: "Products found",
-    data: result,
-    total: totalCount,
+    data: {
+      products: {
+        data: totalProducts,
+        total: totalCount,
+      },
+      filters: filtersWithCategories,
+    },
   });
 });
 
