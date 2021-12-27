@@ -17,6 +17,7 @@ router.get("/product/all", async (req, res) => {
   const searchQuery = req.query.search || "";
   const discount = req.query.discount || "";
   const minPrice = req.query.minimumPrice || "";
+  const maxPrice = req.query.maximumPrice || "";
   const refCategory = req.query.refCategory || "";
   const refCreatedBy = req.query.refCreatedBy || "";
   const sortBy = req.query.sortBy || "";
@@ -29,8 +30,20 @@ router.get("/product/all", async (req, res) => {
   if (discount && parseInt(discount) < 100) {
     filters.discount = { $gte: discount };
   }
-  if (minPrice && parseInt(minPrice) > 0) {
-    filters.price = { $lte: price };
+  if (
+    minPrice &&
+    parseInt(minPrice) > 0 &&
+    maxPrice &&
+    parseInt(maxPrice) > 0
+  ) {
+    filters["$and"] = [
+      { price: { $lte: maxPrice } },
+      { price: { $gte: minPrice } },
+    ];
+  } else if (maxPrice && parseInt(maxPrice) > 0) {
+    filters.price = { $lte: maxPrice };
+  } else if (minPrice && parseInt(minPrice) > 0) {
+    filters.price = { $gte: minPrice };
   }
   if (refCategory) {
     filters.refCategory = refCategory;
