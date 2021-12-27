@@ -19,6 +19,7 @@ router.get("/product/all", async (req, res) => {
   const minPrice = req.query.minimumPrice || "";
   const maxPrice = req.query.maximumPrice || "";
   const refCategory = req.query.refCategory || "";
+  const refSubCategory = req.query.refSubCategory || "";
   const refCreatedBy = req.query.refCreatedBy || "";
   const sortBy = req.query.sortBy || "";
 
@@ -47,6 +48,9 @@ router.get("/product/all", async (req, res) => {
   }
   if (refCategory) {
     filters.refCategory = refCategory;
+  }
+  if (refSubCategory) {
+    filters.refSubCategory = refSubCategory;
   }
   if (refCreatedBy) {
     filters.refCreatedBy = refCreatedBy;
