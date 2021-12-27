@@ -96,9 +96,11 @@ router.get("/product/all", async (req, res) => {
   let filtersWithCategories;
   try {
     if (refCategory) {
+      const tempFilters = { ...filters };
+      if (refSubCategory) delete tempFilters.refSubCategory;
       const tempResult = await ProductModel.aggregate([
         {
-          $match: filters,
+          $match: tempFilters,
         },
         {
           $group: {
