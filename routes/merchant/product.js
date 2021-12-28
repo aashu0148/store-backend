@@ -19,7 +19,8 @@ router.post("/product/add", authenticateUser, async (req, res) => {
     images,
     price,
     discount,
-    quantity,
+    quantityOfProduct,
+    noOfProducts,
   } = req.body;
 
   if (userTypes.merchant !== userType) {
@@ -47,13 +48,16 @@ router.post("/product/add", authenticateUser, async (req, res) => {
     !thumbnail ||
     !Array.isArray(images) ||
     !refUnit ||
-    !quantity
+    !quantityOfProduct ||
+    !noOfProducts
   ) {
     res.status(statusCodes.missingInfo).json({
       status: false,
       message: `Missing fields - ${title ? "" : "title" + " "} ${
         description ? "" : "description" + " "
-      } ${price ? "" : "price" + " "} ${quantity ? "" : "quantity" + " "} ${
+      } ${price ? "" : "price" + " "} ${
+        quantityOfProduct ? "" : "quantityOfProduct" + " "
+      }${noOfProducts ? "" : "noOfProducts" + " "} ${
         refCategory ? "" : "refCategory" + " "
       } ${refSubCategory ? "" : "refSubCategory" + " "}${
         refUnit ? "" : "refUnit" + " "
@@ -76,7 +80,8 @@ router.post("/product/add", authenticateUser, async (req, res) => {
     title,
     description,
     discount: parseInt(discount) || 0,
-    quantity: parseInt(quantity) || 0,
+    quantityOfProduct: parseInt(quantityOfProduct) || 0,
+    noOfProducts: parseInt(noOfProducts) || 0,
     price: parseInt(price),
     refCategory,
     refSubCategory,
@@ -118,7 +123,8 @@ router.post("/product/update:productId", authenticateUser, async (req, res) => {
     images,
     price,
     discount,
-    quantity,
+    quantityOfProduct,
+    noOfProducts,
   } = req.body;
 
   if (userTypes.merchant !== userType) {
@@ -169,10 +175,17 @@ router.post("/product/update:productId", authenticateUser, async (req, res) => {
     });
     return;
   }
-  if (quantity && parseInt(quantity) < 1) {
+  if (quantityOfProduct && parseInt(quantityOfProduct) < 1) {
     res.status(statusCodes.invalidDataSent).json({
       status: false,
-      message: "Minimum quantity can only be 1",
+      message: "Minimum quantityOfProduct can only be 1",
+    });
+    return;
+  }
+  if (noOfProducts && parseInt(noOfProducts) < 1) {
+    res.status(statusCodes.invalidDataSent).json({
+      status: false,
+      message: "Minimum noOfProducts can only be 1",
     });
     return;
   }
@@ -205,8 +218,11 @@ router.post("/product/update:productId", authenticateUser, async (req, res) => {
   if (discount) {
     result.discount = parseInt(discount);
   }
-  if (quantity) {
-    result.quantity = parseInt(quantity);
+  if (quantityOfProduct) {
+    result.quantityOfProduct = parseInt(quantityOfProduct);
+  }
+  if (noOfProducts) {
+    result.noOfProducts = parseInt(noOfProducts);
   }
   if (price) {
     result.price = parseInt(price);
