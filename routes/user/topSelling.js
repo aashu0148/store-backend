@@ -1,11 +1,7 @@
 import express from "express";
-
-import { authenticateUser } from "../../middlewares/authenticate.js";
-
-import { pageSize as sizeOfPage, statusCodes } from "../../utils/constants.js";
+import {  statusCodes } from "../../utils/constants.js";
 import { reqToDbFailed } from "../../utils/utils.js";
 import OrderModel from "../../models/Order.js";
-import ProductModel from "../../models/Product.js";
 import CategoryModel from "../../models/admin/Category.js";
 const router = express.Router();
 
