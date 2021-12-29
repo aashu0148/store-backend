@@ -21,12 +21,16 @@ router.post("/product/add", authenticateUser, async (req, res) => {
     discount,
     quantityOfProduct,
     noOfProducts,
+    shelfLife,
+    storageTemperature,
+    benefits,
+    storageTips,
   } = req.body;
 
   if (userTypes.merchant !== userType) {
     res.status(statusCodes.unauthorized).json({
       status: false,
-      message: "Merchant acount needed",
+      message: "Merchant account needed",
     });
     return;
   }
@@ -49,7 +53,8 @@ router.post("/product/add", authenticateUser, async (req, res) => {
     !Array.isArray(images) ||
     !refUnit ||
     !quantityOfProduct ||
-    !noOfProducts
+    !noOfProducts ||
+    !shelfLife
   ) {
     res.status(statusCodes.missingInfo).json({
       status: false,
@@ -63,7 +68,7 @@ router.post("/product/add", authenticateUser, async (req, res) => {
         refUnit ? "" : "refUnit" + " "
       } ${thumbnail ? "" : "thumbnail" + " "} ${
         Array.isArray(images) ? "" : "images" + " "
-      }`,
+      } ${shelfLife ? "" : "shelfLife" + " "}`,
     });
     return;
   }
@@ -90,6 +95,10 @@ router.post("/product/add", authenticateUser, async (req, res) => {
     images,
     createdAt: new Date(),
     refCreatedBy: userId,
+    shelfLife,
+    storageTemperature: storageTemperature || "",
+    benefits: benefits || "",
+    storageTips: storageTips || "",
   });
 
   newProduct
@@ -125,6 +134,10 @@ router.post("/product/update:productId", authenticateUser, async (req, res) => {
     discount,
     quantityOfProduct,
     noOfProducts,
+    shelfLife,
+    storageTemperature,
+    benefits,
+    storageTips,
   } = req.body;
 
   if (userTypes.merchant !== userType) {
@@ -230,6 +243,19 @@ router.post("/product/update:productId", authenticateUser, async (req, res) => {
   if (images) {
     result.images = images;
   }
+  if (shelfLife) {
+    result.shelfLife = shelfLife;
+  }
+  if (storageTemperature) {
+    result.storageTemperature = storageTemperature;
+  }
+  if (storageTips) {
+    result.storageTips = storageTips;
+  }
+  if (benefits) {
+    result.benefits = benefits;
+  }
+
   result
     .save()
     .then((response) => {

@@ -14,6 +14,10 @@ const productSchema = mongoose.Schema({
   images: Array,
   createdAt: Date,
   refCreatedBy: { type: String, ref: "User" },
+  shelfLife: Number,
+  storageTemperature: Number,
+  benefits: String,
+  storageTips: String,
 });
 
 productSchema.index({ refCategory: 1, title: 1 });
