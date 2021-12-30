@@ -3,9 +3,7 @@ import mongoose from "mongoose";
 const productSchema = mongoose.Schema({
   title: String,
   description: String,
-  discount: Number,
-  price: Number,
-  quantityOfProduct: Number,
+  availabilities: [Object],
   noOfProducts: Number,
   refCategory: { type: String, ref: "Category" },
   refSubCategory: { type: String, ref: "Category.subCategory" },
@@ -13,6 +11,7 @@ const productSchema = mongoose.Schema({
   thumbnail: String,
   images: Array,
   createdAt: Date,
+  updatedAt: Date,
   refCreatedBy: { type: String, ref: "User" },
   shelfLife: Number,
   storageTemperature: Number,

@@ -29,7 +29,7 @@ router.get("/product/all", async (req, res) => {
     };
   }
   if (discount && parseInt(discount) < 100) {
-    filters.discount = { $gte: discount };
+    filters["availabilities.discount"] = { $gte: discount };
   }
   if (
     minPrice &&
@@ -38,13 +38,13 @@ router.get("/product/all", async (req, res) => {
     parseInt(maxPrice) > 0
   ) {
     filters["$and"] = [
-      { price: { $lte: maxPrice } },
-      { price: { $gte: minPrice } },
+      { "availabilities.price": { $lte: maxPrice } },
+      { "availabilities.price": { $gte: minPrice } },
     ];
   } else if (maxPrice && parseInt(maxPrice) > 0) {
-    filters.price = { $lte: maxPrice };
+    filters["availabilities.price"] = { $lte: maxPrice };
   } else if (minPrice && parseInt(minPrice) > 0) {
-    filters.price = { $gte: minPrice };
+    filters["availabilities.price"] = { $gte: minPrice };
   }
   if (refCategory) {
     filters.refCategory = refCategory;
@@ -58,15 +58,15 @@ router.get("/product/all", async (req, res) => {
 
   switch (sortBy) {
     case "price-a": {
-      sorting.price = 1;
+      sorting["availabilities.price"] = 1;
       break;
     }
     case "price-d": {
-      sorting.price = -1;
+      sorting["availabilities.price"] = -1;
       break;
     }
     case "discount": {
-      sorting.discount = -1;
+      sorting["availabilities.discount"] = -1;
       break;
     }
     default:
