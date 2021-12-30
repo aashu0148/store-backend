@@ -240,8 +240,8 @@ router.post("/login", async (req, res) => {
     userType: user.userType,
   });
 
-  user.authToken = user.authToken2;
-  user.authToken2 = token;
+  user.authToken2 = user.authToken;
+  user.authToken = token;
 
   user
     .save()
