@@ -47,7 +47,7 @@ const authenticateUser = async (req, res, next) => {
       });
       return;
     }
-    if (user.authToken != token) {
+    if (user.authToken != token && user.authToken2 != token) {
       res.status(statusCodes.pageNotFound).json({
         status: false,
         message: "Logged in to some other device, need to login again",

@@ -239,7 +239,9 @@ router.post("/login", async (req, res) => {
     id: user._id,
     userType: user.userType,
   });
-  user.authToken = token;
+
+  user.authToken = user.authToken2;
+  user.authToken2 = token;
 
   user
     .save()
@@ -357,6 +359,7 @@ router.post("/register", async (req, res) => {
     userType: newUser.userType,
   });
   newUser.authToken = token;
+  newUser.authToken2 = token;
 
   newUser
     .save()

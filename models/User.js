@@ -12,6 +12,7 @@ const userSchema = mongoose.Schema({
   deliveryState: String,
   mobile: String,
   authToken: String,
+  authToken2: String,
   refCart: String,
   refOrderList: String,
 });
