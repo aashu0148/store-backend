@@ -79,7 +79,7 @@ router.get("/product/all", async (req, res) => {
       sort: sorting,
       limit: pageSize,
       skip: (pageNumber - 1) * pageSize || 0,
-    }).populate("refCategory refUnit");
+    }).populate("refCategory refUnit availabilities.refUnit");
   } catch (err) {
     reqToDbFailed(res, err);
     return;

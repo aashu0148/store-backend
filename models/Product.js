@@ -3,7 +3,14 @@ import mongoose from "mongoose";
 const productSchema = mongoose.Schema({
   title: String,
   description: String,
-  availabilities: [Object],
+  availabilities: [
+    {
+      price: Number,
+      quantity: Number,
+      discount: Number,
+      refUnit: { type: String, ref: "Unit" },
+    },
+  ],
   noOfProducts: Number,
   refCategory: { type: String, ref: "Category" },
   refSubCategory: { type: String, ref: "Category.subCategory" },
