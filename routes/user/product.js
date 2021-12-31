@@ -183,7 +183,9 @@ router.get("/product/:productId", async (req, res) => {
 
   let result;
   try {
-    result = await ProductModel.findOne({ _id: productId });
+    result = await ProductModel.findOne({ _id: productId }).populate(
+      "refCategory refUnit availabilities.refUnit"
+    );
   } catch (err) {
     reqToDbFailed(res, err);
     return;
@@ -197,10 +199,23 @@ router.get("/product/:productId", async (req, res) => {
     return;
   }
 
+  const refSubCategory = result?.refSubCategory;
+  let similarProducts;
+
+  try {
+    similarProducts = await ProductModel.find({
+      refSubCategory: refSubCategory,
+    }).populate("refCategory refUnit availabilities.refUnit");
+  } catch (err) {
+    reqToDbFailed(res, err);
+    return;
+  }
+
   res.status(statusCodes.ok).json({
     status: true,
     message: "Product found",
     data: result,
+    similarProducts,
   });
 });
 
