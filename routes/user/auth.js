@@ -379,8 +379,8 @@ router.post("/register", async (req, res) => {
       return;
     });
 });
-router.post("/update", async (req, res) => {
-  const { firstName, lastName, isMerchant, email, password, mobile ,id} = req.body;
+router.post("/update",authenticateUser, async (req, res) => {
+  const { firstName, lastName, isMerchant, email, password, mobile } = req.body;
   if (isMerchant==="true") {
     if (!firstName || !lastName || !email || !mobile || !password) {
       res.status(statusCodes.missingInfo).json({
@@ -432,7 +432,7 @@ if(isMerchant==="true"){
   let user;
   const userId = req.currentUser?._id;
   try {
-    user = await UserModel.findOne({ _id:id });
+    user = await UserModel.findOne({ _id:userId });
   } catch (err) {
     reqToDbFailed(res, err);
     return;
