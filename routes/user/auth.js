@@ -379,9 +379,9 @@ router.post("/register", async (req, res) => {
       return;
     });
 });
-router.post("/update",authenticateUser, async (req, res) => {
-  const { firstName, lastName, isMerchant, email, password, mobile } = req.body;
-  if (isMerchant) {
+router.post("/update", async (req, res) => {
+  const { firstName, lastName, isMerchant, email, password, mobile ,id} = req.body;
+  if (isMerchant==="true") {
     if (!firstName || !lastName || !email || !mobile || !password) {
       res.status(statusCodes.missingInfo).json({
         status: false,
@@ -394,7 +394,7 @@ router.post("/update",authenticateUser, async (req, res) => {
       return;
     }
   } else {
-    if (!firstName || !lastName || !mobile || !email) {
+    if (!firstName || !lastName || !mobile ) {
       res.status(statusCodes.missingInfo).json({
         status: false,
         message: `Missing fields - ${firstName ? "" : "first name,"} ${
@@ -404,7 +404,7 @@ router.post("/update",authenticateUser, async (req, res) => {
       return;
     }
   }
-
+if(isMerchant==="true"){
   if (!validateEmail(email)) {
     res.status(statusCodes.invalidDataSent).json({
       status: false,
@@ -413,22 +413,26 @@ router.post("/update",authenticateUser, async (req, res) => {
 
     return;
   }
-  if (!validateMobile(mobile)) {
-    res.status(statusCodes.invalidDataSent).json({
-      status: false,
-      message: `Invalid mobile number`,
-    });
-    return;
-  }
+}
+ 
+    if (!validateMobile(mobile)) {
+      res.status(statusCodes.invalidDataSent).json({
+        status: false,
+        message: `Invalid mobile number`,
+      });
+      return;
+    }
+  
+  
 
   let hashedPassword;
-  if (isMerchant) hashPassword(password);
+  if (isMerchant==="true") hashPassword(password);
   else hashedPassword = "";
 
   let user;
   const userId = req.currentUser?._id;
   try {
-    user = await UserModel.findOne({ _id:userId });
+    user = await UserModel.findOne({ _id:id });
   } catch (err) {
     reqToDbFailed(res, err);
     return;
@@ -439,7 +443,7 @@ router.post("/update",authenticateUser, async (req, res) => {
    user.email=email;
    user.password=password;
    user.mobile=mobile;
-   user.userType=isMerchant ? userTypes.merchant : userTypes.customer;
+   user.userType=isMerchant==="true" ? userTypes.merchant : userTypes.customer;
   
   user
     .save()
