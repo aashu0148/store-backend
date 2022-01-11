@@ -378,6 +378,98 @@ router.post("/register", async (req, res) => {
       return;
     });
 });
+router.post("/update",authenticateUser, async (req, res) => {
+  const { firstName, lastName, isMerchant, email, password, mobile } = req.body;
+  if (isMerchant==="true") {
+    if (!firstName || !lastName || !email || !mobile || !password) {
+      res.status(statusCodes.missingInfo).json({
+        status: false,
+        message: `Missing fields - ${firstName ? "" : "first name,"} ${
+          lastName ? "" : "last name,"
+        } ${mobile ? "" : "mobile number,"} ${password ? "" : "password,"} ${
+          email ? "" : "email"
+        }`,
+      });
+      return;
+    }
+  } else {
+    if (!firstName || !lastName || !mobile ) {
+      res.status(statusCodes.missingInfo).json({
+        status: false,
+        message: `Missing fields - ${firstName ? "" : "first name,"} ${
+          lastName ? "" : "last name,"
+        } ${email ? "" : "email,"} ${mobile ? "" : "mobile number"}`,
+      });
+      return;
+    }
+  }
+if(isMerchant==="true"){
+  if (!validateEmail(email)) {
+    res.status(statusCodes.invalidDataSent).json({
+      status: false,
+      message: `Invalid email`,
+    });
+
+    return;
+  }
+}
+ 
+    if (!validateMobile(mobile)) {
+      res.status(statusCodes.invalidDataSent).json({
+        status: false,
+        message: `Invalid mobile number`,
+      });
+      return;
+    }
+  
+  
+
+  let hashedPassword;
+  if (isMerchant==="true") hashPassword(password);
+  else hashedPassword = "";
+
+  let user;
+  const userId = req.currentUser?._id;
+  try {
+    user = await UserModel.findOne({ _id:userId });
+  } catch (err) {
+    reqToDbFailed(res, err);
+    return;
+  }
+  if (user) {
+   user.firstName=firstName;
+   user.lastName=lastName;
+   user.email=email;
+   user.password=password;
+   user.mobile=mobile;
+   user.userType=isMerchant==="true" ? userTypes.merchant : userTypes.customer;
+  
+  user
+    .save()
+    .then((response) => {
+      res.status(statusCodes.created).json({
+        status: true,
+        message: `User Details Updated`,
+        data: response,
+      });
+    })
+    .catch((err) => {
+      res.status(statusCodes.somethingWentWrong).json({
+        status: false,
+        message: `Error updating user`,
+        error: err,
+      });
+      return;
+    });
+  }else{
+    res.status(statusCodes.somethingWentWrong).json({
+      status: false,
+      message: `No User Found`,
+      error: err,
+    });
+    return;
+  }
+});
 
 router.get("/authenticate", authenticateUser, (req, res) => {
   if (req.currentUser?._id) {
