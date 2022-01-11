@@ -303,9 +303,8 @@ router.post("/register", async (req, res) => {
     });
     return;
   }
-
   let hashedPassword;
-  if (isMerchant) hashPassword(password);
+  if (isMerchant) hashedPassword = hashPassword(password);
   else hashedPassword = "";
 
   let userWithEmail;
