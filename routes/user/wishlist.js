@@ -1,7 +1,8 @@
 import express from "express";
 import { statusCodes } from "../../utils/constants.js";
 import { reqToDbFailed } from "../../utils/utils.js";
-import WishlistModel from "../../models/Wishlist.js";
+import ProductModel from "../../models/Product.js";
+import UserModel from "../../models/User.js";
 import { authenticateUser } from "../../middlewares/authenticate.js";
 
 const router = express.Router();
@@ -17,16 +18,15 @@ router.get("/wishlist", authenticateUser, async (req, res) => {
     return;
   }
 
+  const wishlist = req.currentUser?.wishlist || [];
   let result;
   try {
-    result = await WishlistModel.find({ refUser: userId }).populate(
-      "refProduct"
-    );
+    result = await ProductModel.find({ _id: { $in: wishlist } });
   } catch (err) {
     reqToDbFailed(res, err);
     return;
   }
-
+  console.log(result);
   res.status(statusCodes.ok).json({
     status: true,
     message: "Wishlist found",
@@ -53,18 +53,29 @@ router.get("/wishlist/add/:productId", authenticateUser, async (req, res) => {
     return;
   }
 
-  const newWishlist = new WishlistModel({
-    refUser: userId,
-    refProduct: productId,
-  });
+  let user;
+  try {
+    user = await UserModel.findOne({ _id: userId });
+  } catch (err) {
+    reqToDbFailed(res, err);
+    return;
+  }
 
-  newWishlist
+  if (!user) {
+    res.status(statusCodes.invalidDataSent).json({
+      status: false,
+      message: "User not found",
+    });
+    return;
+  }
+  user.wishlist = [...(user.wishlist || []), productId];
+
+  user
     .save()
-    .then((response) => {
+    .then(() => {
       res.status(statusCodes.created).json({
         status: true,
         message: "Product added to wishlist",
-        data: response,
       });
     })
     .catch((err) => {
@@ -77,11 +88,11 @@ router.get("/wishlist/add/:productId", authenticateUser, async (req, res) => {
 });
 
 router.get(
-  "/wishlist/delete/:wishlistId",
+  "/wishlist/delete/:productId",
   authenticateUser,
   async (req, res) => {
     const userId = req.currentUser?._id;
-    const wishlistId = req.params?.wishlistId;
+    const productId = req.params?.productId;
 
     if (!userId) {
       res.status(statusCodes.unauthorized).json({
@@ -90,7 +101,7 @@ router.get(
       });
       return;
     }
-    if (!wishlistId) {
+    if (!productId) {
       res.status(statusCodes.missingInfo).json({
         status: false,
         message: "Wishlist Id not found",
@@ -98,29 +109,50 @@ router.get(
       return;
     }
 
-    let result;
+    let user;
     try {
-      result = await WishlistModel.findOneAndDelete({
-        _id: wishlistId,
-        refUser: userId,
-      });
+      user = await UserModel.findOne({ _id: userId });
     } catch (err) {
       reqToDbFailed(res, err);
       return;
     }
 
-    if (!result) {
-      res.status(statusCodes.noDataAvailable).json({
+    if (!user) {
+      res.status(statusCodes.invalidDataSent).json({
         status: false,
-        message: "Wishlist not found",
+        message: "User not found",
       });
       return;
     }
 
-    res.status(statusCodes.ok).json({
-      status: true,
-      message: "Wishlist Deleted",
-    });
+    const tempWishlist = [...(user.wishlist || [])];
+    const index = tempWishlist.findIndex((item) => item === productId);
+    if (index >= 0) {
+      tempWishlist.splice(index, 1);
+    } else {
+      res.status(statusCodes.invalidDataSent).json({
+        status: false,
+        message: "product not found in wishlist",
+      });
+      return;
+    }
+    user.wishlist = tempWishlist;
+
+    user
+      .save()
+      .then(() => {
+        res.status(statusCodes.ok).json({
+          status: true,
+          message: "Product deleted from wishlist",
+        });
+      })
+      .catch((err) => {
+        res.status(statusCodes.somethingWentWrong).json({
+          status: false,
+          message: "Something went wrong",
+          error: err,
+        });
+      });
   }
 );
 

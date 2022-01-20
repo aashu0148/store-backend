@@ -1,9 +1,29 @@
 import express from "express";
 
 import ProductModel from "../../models/Product.js";
+import UserModel from "../../models/User.js";
+import { verifyToken } from "../../utils/authToken.js";
 import { pageSize as sizeOfPage, statusCodes } from "../../utils/constants.js";
 import { reqToDbFailed } from "../../utils/utils.js";
 const router = express.Router();
+
+const getUserWishlist = async (token) => {
+  const result = verifyToken(token);
+  if (!result) return "";
+  const id = result.id;
+
+  let user;
+  try {
+    user = await UserModel.findOne({ _id: id }, "-password");
+  } catch {
+    return "";
+  }
+
+  if (!user) return "";
+  const wishlist = user.wishlist || [];
+  if (Array.isArray(wishlist) && wishlist.length > 0) return wishlist;
+  else return "";
+};
 
 router.get("/product/all", async (req, res) => {
   const pageSize = req.query.pageSize
@@ -165,6 +185,20 @@ router.get("/product/all", async (req, res) => {
     return;
   }
 
+  const token = req.headers.authorization;
+  if (token) {
+    const wishlist = await getUserWishlist(token);
+    
+    if (wishlist) {
+      totalProducts.forEach((item, index) => {
+        const match = wishlist.find((elem) => elem === item?._id?.toString());
+  
+        if (match) totalProducts[index].isFavorite = true;
+        else totalProducts[index].isFavorite = false;
+      });
+    }
+  }
+
   res.status(statusCodes.ok).json({
     status: true,
     message: "Products found",
@@ -209,6 +243,16 @@ router.get("/product/:productId", async (req, res) => {
   } catch (err) {
     reqToDbFailed(res, err);
     return;
+  }
+
+  const token = req.headers.authorization;
+  if (token) {
+    const wishlist = await getUserWishlist(token);
+    if (wishlist) {
+      const match = wishlist.find((elem) => elem === result._id);
+      if (match) result.isFavorite = true;
+      else result.isFavorite = false;
+    }
   }
 
   res.status(statusCodes.ok).json({

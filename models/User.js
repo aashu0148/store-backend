@@ -15,6 +15,7 @@ const userSchema = mongoose.Schema({
   authToken2: String,
   refCart: String,
   refOrderList: String,
+  wishlist: Array,
 });
 
 const model = mongoose.model("User", userSchema);
