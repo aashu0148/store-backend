@@ -254,11 +254,24 @@ router.get("/product/:productId", async (req, res) => {
   if (token) {
     const wishlist = await getUserWishlist(token);
     if (wishlist) {
-      const newResult = result.toObject();
-      const match = wishlist.find((elem) => elem === newResult._id.toString());
-      if (match) newResult.isFavorite = true;
-      else newResult.isFavorite = false;
-      result = { ...newResult };
+      const tempResult = result.toObject();
+      const match = wishlist.find((elem) => elem === tempResult._id.toString());
+      if (match) tempResult.isFavorite = true;
+      else tempResult.isFavorite = false;
+      result = { ...tempResult };
+
+      // for similar products
+      const tempSimilarProducts = similarProducts.map((item) => {
+        const product = item.toObject();
+        const match = wishlist.find(
+          (elem) => elem === product?._id?.toString()
+        );
+
+        if (match) product.isFavorite = true;
+        else product.isFavorite = false;
+        return product;
+      });
+      similarProducts = [...tempSimilarProducts];
     }
   }
 
