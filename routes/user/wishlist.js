@@ -26,7 +26,17 @@ router.get("/wishlist", authenticateUser, async (req, res) => {
     reqToDbFailed(res, err);
     return;
   }
-  console.log(result);
+
+  const tempResult = result.map((item) => {
+    const product = item.toObject();
+    const match = wishlist.find((elem) => elem === product?._id?.toString());
+
+    if (match) product.isFavorite = true;
+    else product.isFavorite = false;
+    return product;
+  });
+  result = [...tempResult];
+
   res.status(statusCodes.ok).json({
     status: true,
     message: "Wishlist found",
