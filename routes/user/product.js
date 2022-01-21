@@ -188,14 +188,19 @@ router.get("/product/all", async (req, res) => {
   const token = req.headers.authorization;
   if (token) {
     const wishlist = await getUserWishlist(token);
-    
+
     if (wishlist) {
-      totalProducts.forEach((item, index) => {
-        const match = wishlist.find((elem) => elem === item?._id?.toString());
-  
-        if (match) totalProducts[index].isFavorite = true;
-        else totalProducts[index].isFavorite = false;
+      const newTotalProducts = totalProducts.map((item) => {
+        const product = item.toObject();
+        const match = wishlist.find(
+          (elem) => elem === product?._id?.toString()
+        );
+
+        if (match) product.isFavorite = true;
+        else product.isFavorite = false;
+        return product;
       });
+      totalProducts = [...newTotalProducts];
     }
   }
 
@@ -249,9 +254,11 @@ router.get("/product/:productId", async (req, res) => {
   if (token) {
     const wishlist = await getUserWishlist(token);
     if (wishlist) {
-      const match = wishlist.find((elem) => elem === result._id);
-      if (match) result.isFavorite = true;
-      else result.isFavorite = false;
+      const newResult = result.toObject();
+      const match = wishlist.find((elem) => elem === newResult._id.toString());
+      if (match) newResult.isFavorite = true;
+      else newResult.isFavorite = false;
+      result = { ...newResult };
     }
   }
 
