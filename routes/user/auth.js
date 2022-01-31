@@ -380,42 +380,44 @@ router.post("/register", async (req, res) => {
     });
 });
 router.post("/update", authenticateUser, async (req, res) => {
-  const { firstName, lastName, isMerchant, email, password, mobile } = req.body;
-  if (isMerchant === "true") {
-    if (!firstName || !lastName || !email || !mobile || !password) {
-      res.status(statusCodes.missingInfo).json({
-        status: false,
-        message: `Missing fields - ${firstName ? "" : "first name,"} ${
-          lastName ? "" : "last name,"
-        } ${mobile ? "" : "mobile number,"} ${password ? "" : "password,"} ${
-          email ? "" : "email"
-        }`,
-      });
-      return;
-    }
-  } else {
-    if (!firstName || !lastName || !mobile) {
-      res.status(statusCodes.missingInfo).json({
-        status: false,
-        message: `Missing fields - ${firstName ? "" : "first name,"} ${
-          lastName ? "" : "last name,"
-        } ${email ? "" : "email,"} ${mobile ? "" : "mobile number"}`,
-      });
-      return;
-    }
-  }
-  if (isMerchant === "true") {
-    if (!validateEmail(email)) {
-      res.status(statusCodes.invalidDataSent).json({
-        status: false,
-        message: `Invalid email`,
-      });
-
-      return;
-    }
+  const {
+    firstName,
+    lastName,
+    isMerchant,
+    email,
+    password,
+    mobile,
+    profileImage,
+    deliveryAddress,
+    refLocation,
+  } = req.body;
+  if (
+    !firstName &&
+    !lastName &&
+    !email &&
+    !mobile &&
+    !password &&
+    !profileImage &&
+    !deliveryAddress &&
+    !refLocation
+  ) {
+    res.status(statusCodes.missingInfo).json({
+      status: false,
+      message: `Send fields to update`,
+    });
+    return;
   }
 
-  if (!validateMobile(mobile)) {
+  if (email && !validateEmail(email)) {
+    res.status(statusCodes.invalidDataSent).json({
+      status: false,
+      message: `Invalid email`,
+    });
+
+    return;
+  }
+
+  if (mobile && !validateMobile(mobile)) {
     res.status(statusCodes.invalidDataSent).json({
       status: false,
       message: `Invalid mobile number`,
@@ -424,8 +426,7 @@ router.post("/update", authenticateUser, async (req, res) => {
   }
 
   let hashedPassword;
-  if (isMerchant === "true") hashPassword(password);
-  else hashedPassword = "";
+  if (isMerchant && password) hashedPassword = hashPassword(password);
 
   let user;
   const userId = req.currentUser?._id;
@@ -435,22 +436,23 @@ router.post("/update", authenticateUser, async (req, res) => {
     reqToDbFailed(res, err);
     return;
   }
+
   if (user) {
-    user.firstName = firstName;
-    user.lastName = lastName;
-    user.email = email;
-    user.password = password;
-    user.mobile = mobile;
-    user.userType =
-      isMerchant === "true" ? userTypes.merchant : userTypes.customer;
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (email) user.email = email;
+    if (password && isMerchant) user.password = password;
+    if (mobile) user.mobile = mobile;
+    if (profileImage) user.profileImage = profileImage;
+    if (deliveryAddress) user.deliveryAddress = deliveryAddress;
+    if (refLocation) user.refLocation = refLocation;
 
     user
       .save()
-      .then((response) => {
+      .then(() => {
         res.status(statusCodes.created).json({
           status: true,
           message: `User Details Updated`,
-          data: response,
         });
       })
       .catch((err) => {
