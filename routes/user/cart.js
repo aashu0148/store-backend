@@ -28,6 +28,13 @@ router.post("/cart/update", authenticateUser, async (req, res) => {
   }
 
   if (!result) {
+    if (parseInt(quantity) === -1) {
+      res.status(statusCodes.noDataAvailable).json({
+        status: false,
+        message: "No products found",
+      });
+      return;
+    }
     product.push({
       refProduct: productId,
       quantity: quantity,
