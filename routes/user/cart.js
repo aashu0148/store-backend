@@ -42,7 +42,9 @@ router.post("/cart/add", authenticateUser, async (req, res) => {
 
     result = newCart;
   } else {
-    let index = result?.products?.findIndex((x) => x.refProduct === productId);
+    let index = result?.products?.findIndex(
+      (x) => x.refProduct?.toString() === productId
+    );
     if (index > -1) {
       result.products[index].quantity += quantity;
       result.updatedAt = new Date();
@@ -101,23 +103,6 @@ router.get("/cart", authenticateUser, async (req, res) => {
     });
     return;
   }
-  let products = [];
-  // result?.products?.forEach((element,index) => {
-  //   let prod;
-  //   console.log(element)
-  //   try {
-  //     prod   = await ProductModel.findOne({ _id: "61b3755cfd655b693ad199b2" });
-  //   } catch (err) {
-  //     reqToDbFailed(res, err);
-  //     return;
-  //   }
-  //   console.log(prod)
-  //   if(prod?.length>0){
-  //     products.push(prod);
-  //     products[index].quantity=element.quantity;
-  //   }
-  // });
-  // console.log(products)
 
   res.status(statusCodes.ok).json({
     status: true,
