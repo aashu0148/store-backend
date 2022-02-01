@@ -99,7 +99,7 @@ router.get("/cart", authenticateUser, async (req, res) => {
   let result;
   try {
     result = await CartModel.findOne({ userId: userId }).populate(
-      "products.refProduct products.refProduct.availabilities.refUnit"
+      "products.refProduct products.refProduct.refCategory products.refProduct.availabilities.refUnit"
     );
   } catch (err) {
     reqToDbFailed(res, err);
