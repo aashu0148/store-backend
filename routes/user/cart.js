@@ -2,12 +2,12 @@ import express from "express";
 
 import { authenticateUser } from "../../middlewares/authenticate.js";
 import CartModel from "../../models/Cart.js";
-import { pageSize as sizeOfPage, statusCodes } from "../../utils/constants.js";
+import { statusCodes } from "../../utils/constants.js";
 import { reqToDbFailed } from "../../utils/utils.js";
-import ProductModel from "../../models/Product.js";
+
 const router = express.Router();
 
-router.post("/cart/add", authenticateUser, async (req, res) => {
+router.post("/cart/update", authenticateUser, async (req, res) => {
   const { productId, quantity } = req.body;
   const userId = req.currentUser?._id;
   if (!userId) {
@@ -46,14 +46,17 @@ router.post("/cart/add", authenticateUser, async (req, res) => {
       (x) => x.refProduct?.toString() === productId
     );
     if (index > -1) {
-      result.products[index].quantity += quantity;
-      result.updatedAt = new Date();
+      if (parseInt(quantity) === -1) {
+        result.splice(index, 1);
+      } else {
+        result.products[index].quantity = quantity;
+        result.updatedAt = new Date();
+      }
     } else {
       result.products.push({
         refProduct: productId,
         quantity: quantity,
       });
-
       result.updatedAt = new Date();
     }
   }
