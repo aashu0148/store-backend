@@ -14,7 +14,6 @@ const productSchema = mongoose.Schema({
   noOfProducts: Number,
   refCategory: { type: String, ref: "Category" },
   refSubCategory: { type: String, ref: "Category.subCategory" },
-  refUnit: { type: String, ref: "Unit" },
   thumbnail: String,
   images: Array,
   createdAt: Date,
